@@ -1,0 +1,12 @@
+name = "cove-token-server"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+API_KEY = "APIMHobLy2Nny6k"
+# API_SECRET 需要在 Cloudflare Dashboard 设置
+# 访问：https://dash.cloudflare.com → Workers → cove-token-server → Settings → Variables
+
+[env.production]
+route = { pattern = "cove-token-server.your-subdomain.workers.dev", zone_name = "your-domain.com" }
