@@ -7,15 +7,9 @@ actor LiveKitService {
     private var room: Room?
     private let serverURL = "wss://cove-kql9fowp.livekit.cloud"
     
-    // TODO: Load from secure config or backend token server
-    // For MVP testing, generate token from LiveKit Cloud dashboard
-    // Token expires after 15 minutes - regenerate as needed
-    private var testToken: String {
-        // Replace with your generated token from LiveKit Cloud
-        // Go to: https://cloud.livekit.io/projects/p:livekit-cove
-        // Use token generator in dashboard
-        return "YOUR_GENERATED_TOKEN_HERE"
-    }
+    // Cloudflare Worker Token Server URL
+    // Deployed at: https://cove-token-server.iocompile67692.workers.dev
+    private let tokenServerURL = "https://cove-token-server.iocompile67692.workers.dev"
     
     private init() {}
     
@@ -33,11 +27,12 @@ actor LiveKitService {
         
         room.delegate = self
         
-        // For MVP testing, use pre-generated token
-        // TODO: Implement backend token server for production
+        // Generate token from Cloudflare Worker
+        let token = try await generateToken(room: roomName, participant: participantName)
+        
         try await room.connect(
             url: serverURL,
-            token: testToken,
+            token: token,
             options: roomOptions
         )
         
@@ -58,6 +53,27 @@ actor LiveKitService {
         let isMuted = localParticipant.isMicrophoneEnabled == false
         try? await localParticipant.setMicrophoneEnabled(!isMuted)
     }
+    
+    private func generateToken(room: String, participant: String) async throws -> String {
+        let url = URL(string: tokenServerURL)!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try? JSONSerialization.data(withJSONObject: [
+            "room": room,
+            "participant": participant
+        ])
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
+        
+        let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: data)
+        return tokenResponse.token
+    }
 }
 
 extension LiveKitService: RoomDelegate {
@@ -76,4 +92,8 @@ extension LiveKitService: RoomDelegate {
     nonisolated func room(_ room: Room, didConnect isSilent: Bool) {
         print("Connected to room")
     }
+}
+
+struct TokenResponse: Codable {
+    let token: String
 }

@@ -4,9 +4,8 @@ compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
 [vars]
-API_KEY = "APIMHobLy2Nny6k"
-# API_SECRET 需要在 Cloudflare Dashboard 设置
-# 访问：https://dash.cloudflare.com → Workers → cove-token-server → Settings → Variables
+API_KEY = "API9m8qZmwgKCKp"
+# API_SECRET 已设置（使用 wrangler secret put API_SECRET）
 
 [env.production]
 route = { pattern = "cove-token-server.your-subdomain.workers.dev", zone_name = "your-domain.com" }
