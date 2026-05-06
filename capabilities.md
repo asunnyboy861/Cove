@@ -14,12 +14,20 @@ Based on operation guide analysis:
 | Push Notifications | ✅ Configured | Xcode project |
 | Background Modes (Audio) | ✅ Configured | Info.plist |
 | Background Modes (VoIP) | ✅ Configured | Info.plist |
+| LiveKit Cloud Integration | ✅ Configured | LiveKitService.swift |
 
 ## Manual Configuration Required
 | Capability | Status | Steps |
 |------------|--------|-------|
 | Push Notifications (APNs Cert) | ⏳ Pending | Upload APNs certificate to server backend when deploying |
 | In-App Purchase (StoreKit 2) | ✅ No capability needed | StoreKit 2 uses ProductID configuration in App Store Connect |
+| LiveKit API Secret | ⏳ Pending | Generate in LiveKit Cloud and deploy token server (see Config/LiveKit.md) |
+
+## LiveKit Cloud Configuration
+- **Server URL**: `wss://cove-kql9fowp.livekit.cloud`
+- **API Key**: `APIMHobLy2Nny6k`
+- **Dashboard**: https://cloud.livekit.io/projects/p:livekit-cove
+- **Config File**: `Cove/Config/LiveKit.md`
 
 ## No Configuration Needed
 - iCloud / CloudKit — Not used (local-first storage)
