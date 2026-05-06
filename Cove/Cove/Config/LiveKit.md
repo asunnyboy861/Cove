@@ -3,34 +3,35 @@
 ## Credentials
 - **Server URL**: `wss://cove-kql9fowp.livekit.cloud`
 - **API Key**: `APIMHobLy2Nny6k`
-- **API Secret**: ⚠️ **NEEDS TO BE GENERATED AND STORED SECURELY**
+- **API Secret**: ⚠️ **Store securely in backend**
 
-## Security Notes
+## Current Setup (MVP Testing)
 
-### ⚠️ IMPORTANT: API Secret Security
-
-The API Secret should **NEVER** be stored in the iOS app code. It must be kept on a backend server.
-
-### Current Setup (Development Only)
-For testing purposes only, you can temporarily add the secret to the app:
-
+For MVP testing, a pre-generated token is embedded in `LiveKitService.swift`:
 ```swift
-// In LiveKitService.swift - DEVELOPMENT ONLY
-private let apiSecret = "YOUR_GENERATED_SECRET" // ⚠️ Replace before production
+private let testToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-### Production Setup (Required)
+**Limitations**:
+- Token expires after 15 minutes
+- Fixed participant identity (testuser)
+- Fixed room name (test-room)
+- Not suitable for production
 
-For production, implement a token server:
+## Production Setup (Required)
 
-1. **Create a simple backend** (Node.js example):
+### Option 1: Simple Token Server (Recommended)
+
+Create a minimal backend to generate tokens dynamically:
+
+**Node.js Example**:
 ```javascript
 const express = require('express');
 const { AccessToken } = require('livekit-server-sdk');
 
 const app = express();
 const API_KEY = 'APIMHobLy2Nny6k';
-const API_SECRET = 'YOUR_SECRET';
+const API_SECRET = 'YOUR_SECRET_FROM_LIVEKIT';
 
 app.post('/token', (req, res) => {
   const { room, participant } = req.body;
@@ -45,10 +46,12 @@ app.post('/token', (req, res) => {
   res.json({ token: token.toJwt() });
 });
 
-app.listen(3000);
+app.listen(3000, () => {
+  console.log('Token server running on port 3000');
+});
 ```
 
-2. **Update LiveKitService.swift**:
+**Update LiveKitService.swift**:
 ```swift
 private func generateToken(room: String, participant: String) async throws -> String {
     let url = URL(string: "https://your-backend.com/token")!
@@ -70,13 +73,43 @@ struct TokenResponse: Codable {
 }
 ```
 
+### Option 2: LiveKit Cloud Token Server
+
+LiveKit Cloud offers a hosted token server. Configure in:
+1. Go to https://cloud.livekit.io/projects/p:livekit-cove
+2. Settings → Token Server
+3. Enable and configure
+
+Then update `LiveKitService.swift` to use the token server URL.
+
 ## Next Steps
 
-1. Generate API Secret in LiveKit Cloud Console
-2. For MVP testing: Add secret to code temporarily
-3. For production: Deploy token server
-4. Update `generateToken()` method to use backend
+1. **Get API Secret**:
+   - Go to LiveKit Cloud → API keys
+   - Click menu (⋮) next to your key
+   - Select "View Secret" or "Regenerate"
+   - Save it securely
+
+2. **For MVP Testing**:
+   - Current setup works for 15 minutes
+   - Generate new token when expired
+   - Use LiveKit Cloud dashboard to generate tokens
+
+3. **For Production**:
+   - Deploy token server (Node.js example above)
+   - Store API Secret in environment variables
+   - Update `generateToken()` method
 
 ## LiveKit Cloud Dashboard
 
-Access your project: https://cloud.livekit.io/projects/p:livekit-cove
+- **Project**: https://cloud.livekit.io/projects/p:livekit-cove
+- **API Keys**: Settings → API keys
+- **Token Generator**: Use dashboard to generate test tokens
+
+## Testing
+
+To test voice rooms:
+1. Build and run app
+2. Navigate to Voice Rooms
+3. Join a room
+4. Test audio (mute/unmute)

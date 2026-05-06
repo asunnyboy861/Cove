@@ -6,3 +6,5 @@ Pods/
 *.ipa
 .env
 Config.xcconfig
+**/Config/*.secret
+**/Config/LocalConfig.swift

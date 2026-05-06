@@ -1,0 +1,13 @@
+// Local Configuration for Development
+// ⚠️ DO NOT COMMIT THIS FILE TO GIT!
+// Add to .gitignore
+
+import Foundation
+
+struct LiveKitConfig {
+    static let serverURL = "wss://cove-kql9fowp.livekit.cloud"
+    
+    // Generate token from LiveKit Cloud dashboard
+    // https://cloud.livekit.io/projects/p:livekit-cove
+    static let testToken = "YOUR_GENERATED_TOKEN_HERE"
+}

@@ -6,7 +6,16 @@ actor LiveKitService {
     
     private var room: Room?
     private let serverURL = "wss://cove-kql9fowp.livekit.cloud"
-    private let apiKey = "APIMHobLy2Nny6k"
+    
+    // TODO: Load from secure config or backend token server
+    // For MVP testing, generate token from LiveKit Cloud dashboard
+    // Token expires after 15 minutes - regenerate as needed
+    private var testToken: String {
+        // Replace with your generated token from LiveKit Cloud
+        // Go to: https://cloud.livekit.io/projects/p:livekit-cove
+        // Use token generator in dashboard
+        return "YOUR_GENERATED_TOKEN_HERE"
+    }
     
     private init() {}
     
@@ -24,9 +33,11 @@ actor LiveKitService {
         
         room.delegate = self
         
+        // For MVP testing, use pre-generated token
+        // TODO: Implement backend token server for production
         try await room.connect(
             url: serverURL,
-            token: try await generateToken(room: roomName, participant: participantName),
+            token: testToken,
             options: roomOptions
         )
         
@@ -46,16 +57,6 @@ actor LiveKitService {
         
         let isMuted = localParticipant.isMicrophoneEnabled == false
         try? await localParticipant.setMicrophoneEnabled(!isMuted)
-    }
-    
-    private func generateToken(room: String, participant: String) async throws -> String {
-        let token = AccessToken(apiKey: apiKey, secret: "YOUR_API_SECRET")
-            .withIdentity(participant)
-            .withName(participant)
-            .withRoom(room)
-            .withVideoJoin(true)
-        
-        return try token.toJWT()
     }
 }
 
